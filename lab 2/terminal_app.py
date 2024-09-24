@@ -4,7 +4,6 @@ import struct
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QTextEdit, QLabel
 
 def read_from_memory(pid, address, size=4):
-    """Функция для чтения памяти процесса"""
     try:
         with open(f"/proc/{pid}/mem", 'rb', 0) as mem_file:
             mem_file.seek(address)
@@ -13,7 +12,6 @@ def read_from_memory(pid, address, size=4):
         return str(e)
 
 def write_to_memory(pid, address, value):
-    """Функция для записи в память процесса"""
     try:
         with open(f"/proc/{pid}/mem", 'wb', 0) as mem_file:
             mem_file.seek(address)
@@ -46,11 +44,9 @@ class CustomTerminal(QWidget):
         self.setLayout(layout)
 
     def append_output(self, text):
-        """Функция для добавления текста в окно вывода"""
         self.output.append(text)
 
     def process_command(self):
-        """Обработка введенной команды"""
         command = self.command_input.text().strip()
         if command:
             self.append_output(f"Выполнение команды: {command}")
@@ -83,12 +79,10 @@ class CustomTerminal(QWidget):
                 self.append_output("Ошибка: неизвестная команда или неверное количество аргументов.")
 
     def meminfo(self):
-        """Вывод информации о памяти"""
         mem = psutil.virtual_memory()
         self.append_output(f"Общая память: {mem.total}, Свободная память: {mem.available}, Используется: {mem.used}")
 
     def readmem(self, address):
-        """Чтение данных по адресу"""
         try:
             if not self.attached_process:
                 self.append_output("Ошибка: необходимо присоединиться к процессу.")
@@ -106,7 +100,6 @@ class CustomTerminal(QWidget):
             self.append_output(f"Ошибка: неверный адрес {address}")
 
     def writemem(self, address, value):
-        """Запись данных по адресу"""
         try:
             if not self.attached_process:
                 self.append_output("Ошибка: необходимо присоединиться к процессу.")
@@ -121,13 +114,11 @@ class CustomTerminal(QWidget):
             self.append_output(f"Ошибка: неверный адрес {address}")
 
     def processlist(self):
-        """Вывод списка процессов"""
         processes = psutil.process_iter(['pid', 'name'])
         for proc in processes:
             self.append_output(f"PID: {proc.info['pid']}, Имя: {proc.info['name']}")
 
     def killprocess(self, pid):
-        """Завершение процесса по ID"""
         try:
             p = psutil.Process(int(pid))
             p.terminate()
@@ -136,7 +127,6 @@ class CustomTerminal(QWidget):
             self.append_output(f"Ошибка при завершении процесса {pid}: {str(e)}")
 
     def memusage(self):
-        """Использование памяти текущим приложением"""
         try:
             process = psutil.Process(os.getpid())
             mem_info = process.memory_info()
@@ -145,7 +135,6 @@ class CustomTerminal(QWidget):
             self.append_output(f"Ошибка при получении использования памяти: {str(e)}")
 
     def findprocess(self, name):
-        """Поиск процесса по имени"""
         found = False
         for proc in psutil.process_iter(['pid', 'name']):
             if proc.info['name'] == name:
@@ -155,7 +144,6 @@ class CustomTerminal(QWidget):
             self.append_output(f"Процесс с именем {name} не найден.")
 
     def attach(self, pid):
-        """Присоединение к процессу с использованием gdb"""
         try:
             os.system(f"sudo gdb -p {pid}")  # Используем gdb для присоединения к процессу
             self.attached_process = psutil.Process(int(pid))
@@ -164,7 +152,6 @@ class CustomTerminal(QWidget):
             self.append_output(f"Ошибка при присоединении к процессу: {str(e)}")
 
     def detach(self):
-        """Отключение от процесса"""
         if self.attached_process:
             try:
                 os.system(f"sudo gdb -p {self.attached_process.pid} -batch -ex detach")  # Отключение через gdb

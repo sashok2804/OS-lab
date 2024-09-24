@@ -80,4 +80,78 @@ class CommandLineApp:
             output += f"{p[0]}    {p[1]}    {p[2]:.1f}    {p[3]:.1f}\n"
         return output
 
-    # Другие команды аналогично...
+    def thread_start(self, args):
+        if len(args) < 2:
+            return "Usage: thread-start <name>"
+        name = args[1]
+        stop_flag = Event()
+        thread = Thread(target=self.dummy_thread, args=(name, stop_flag))
+        thread.start()
+        threads[name] = thread
+        thread_stop_flags[name] = stop_flag
+        return f"Thread {name} started."
+
+    def thread_stop(self, args):
+        if len(args) < 2:
+            return "Usage: thread-stop <name>"
+        name = args[1]
+        if name in threads:
+            thread_stop_flags[name].set()
+            threads[name].join()
+            del threads[name]
+            del thread_stop_flags[name]
+            return f"Thread {name} stopped."
+        return f"No thread with name {name}."
+
+    def dummy_thread(self, name, stop_flag):
+        while not stop_flag.is_set():
+            print(f"Thread {name} is running...")
+            time.sleep(1)
+
+    def proc_start(self, args):
+        if len(args) < 2:
+            return "Usage: proc-start <name>"
+        name = args[1]
+        process = Process(target=self.dummy_process, args=(name,))
+        process.start()
+        processes[process.pid] = process
+        return f"Process {name} started with PID {process.pid}."
+
+    def proc_stop(self, args):
+        if len(args) < 2:
+            return "Usage: proc-stop <pid>"
+        pid = int(args[1])
+        if pid in processes:
+            processes[pid].terminate()
+            return f"Process {pid} stopped."
+        return f"No process with PID {pid}."
+
+    def dummy_process(self, name):
+        while True:
+            print(f"Process {name} is running...")
+            time.sleep(1)
+
+    def proc_status(self, args):
+        if len(args) < 2:
+            return "Usage: proc-status <pid>"
+        pid = int(args[1])
+        if pid in processes:
+            return f"Process {pid} is running."
+        return f"No process with PID {pid}."
+
+    def proc_priority(self, args):
+        if len(args) < 3:
+            return "Usage: proc-priority <pid> <priority>"
+        pid = int(args[1])
+        priority = int(args[2])
+        if pid in processes:
+            os.nice(priority)
+            return f"Priority of process {pid} set to {priority}."
+        return f"No process with PID {pid}."
+
+    def find(self, args):
+        if len(args) < 2:
+            return "Usage: find <file_name>"
+        file_name = args[1]
+        files = glob.glob(f"**/{file_name}", recursive=True)
+        return "\n".join(files) if files else f"No files found with name {file_name}."
