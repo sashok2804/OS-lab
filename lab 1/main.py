@@ -3,6 +3,8 @@ from tkinter import ttk
 from battery import charge_battery_process, discharge_battery_process
 from command_line import CommandLineApp
 from multiprocessing import Value
+from multiprocessing import Process
+
 
 class BatteryApp:
     def __init__(self, parent):
