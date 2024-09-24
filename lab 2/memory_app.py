@@ -1,3 +1,4 @@
+import os
 import psutil
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLineEdit, QTextEdit, QLabel
 
@@ -20,6 +21,11 @@ class MemoryApp(QWidget):
         layout.addWidget(QLabel("Значение:"))
         layout.addWidget(self.value_input)
 
+        self.pid_input = QLineEdit(self)
+        self.pid_input.setPlaceholderText("Введите PID процесса")
+        layout.addWidget(QLabel("PID процесса:"))
+        layout.addWidget(self.pid_input)
+
         self.output = QTextEdit(self)
         self.output.setReadOnly(True)
         layout.addWidget(QLabel("Вывод:"))
@@ -41,24 +47,44 @@ class MemoryApp(QWidget):
 
     def read_memory(self):
         address = self.address_input.text()
-        if not address:
-            self.output.append("Ошибка: адрес не введён.")
+        pid = self.pid_input.text()
+
+        if not address or not pid:
+            self.output.append("Ошибка: адрес или PID не введены.")
             return
 
         try:
-            self.output.append(f"Чтение данных по адресу {address}: значение 0xDEADBEEF (эмуляция)")
+            addr = int(address, 16)
+            pid = int(pid)
+
+            mem_file = f"/proc/{pid}/mem"
+            with open(mem_file, 'rb') as mem:
+                mem.seek(addr)
+                value = mem.read(4)  # Чтение 4 байт
+                value_hex = value.hex()
+                self.output.append(f"Чтение данных по адресу {address} (PID {pid}): значение {value_hex}")
         except Exception as e:
             self.output.append(f"Ошибка при чтении данных: {str(e)}")
 
     def write_memory(self):
         address = self.address_input.text()
         value = self.value_input.text()
-        if not address or not value:
-            self.output.append("Ошибка: адрес или значение не введены.")
+        pid = self.pid_input.text()
+
+        if not address or not value or not pid:
+            self.output.append("Ошибка: адрес, значение или PID не введены.")
             return
 
         try:
-            self.output.append(f"Запись значения {value} по адресу {address} выполнена успешно (эмуляция).")
+            addr = int(address, 16)
+            pid = int(pid)
+            value_bytes = bytes.fromhex(value)
+
+            mem_file = f"/proc/{pid}/mem"
+            with open(mem_file, 'r+b') as mem:
+                mem.seek(addr)
+                mem.write(value_bytes)
+                self.output.append(f"Запись значения {value} по адресу {address} (PID {pid}) выполнена успешно.")
         except Exception as e:
             self.output.append(f"Ошибка при записи данных: {str(e)}")
 
