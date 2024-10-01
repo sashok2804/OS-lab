@@ -6,12 +6,13 @@ def get_gpu_info():
         gpu_info = subprocess.check_output("lspci -v | grep -i vga", shell=True).decode('utf-8')
         return gpu_info
     except Exception as e:
-        return f"Error retrieving GPU info: {str(e)}"
+        return f"Ошибка получения информации о видеокарте: {str(e)}"
 
-# Функция для получения информации о подключенных мониторах
+# Функция для получения информации о подключённых мониторах
 def get_monitor_info():
     try:
-        monitor_info = subprocess.check_output("xrandr", shell=True).decode('utf-8')
+        # Используем xrandr для получения информации о мониторах
+        monitor_info = subprocess.check_output("xrandr --listmonitors", shell=True).decode('utf-8')
         return monitor_info
     except Exception as e:
-        return f"Error retrieving monitor info: {str(e)}"
+        return f"Ошибка получения информации о мониторах: {str(e)}"
