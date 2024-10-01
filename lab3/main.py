@@ -68,8 +68,11 @@ class Application(tk.Tk):
     def run_terminal_command(self):
         command = self.command_entry.get()
         if command:
-            output = run_terminal_command(command)
-            self.display_terminal_output(output)
+            if command.strip() == 'clear':
+                self.clear_terminal()
+            else:
+                output = run_terminal_command(command)
+                self.display_terminal_output(output)
             self.command_entry.delete(0, tk.END)
 
     def display_terminal_output(self, output):
@@ -77,6 +80,11 @@ class Application(tk.Tk):
         self.terminal_output.insert(tk.END, f"$ {output}\n")
         self.terminal_output.config(state='disabled')
         self.terminal_output.see(tk.END)
+
+    def clear_terminal(self):
+        self.terminal_output.config(state='normal')
+        self.terminal_output.delete(1.0, tk.END)  # Очищаем текстовый виджет
+        self.terminal_output.config(state='disabled')
 
 
 if __name__ == "__main__":
