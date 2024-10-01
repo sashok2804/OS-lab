@@ -4,7 +4,6 @@ import platform
 from tkinter import messagebox
 
 def run_terminal_command(command):
-    # Разбиваем команду на слова для удобной обработки
     command_parts = command.strip().split()
 
     if not command_parts:
@@ -32,7 +31,7 @@ def run_terminal_command(command):
         )
 
     elif cmd == 'clear':
-        return ""  # Эта команда может очищать вывод окна в вашем GUI, обработка на стороне интерфейса.
+        return ""  
 
     elif cmd == 'ls':
         try:

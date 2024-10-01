@@ -83,7 +83,7 @@ class Application(tk.Tk):
 
     def clear_terminal(self):
         self.terminal_output.config(state='normal')
-        self.terminal_output.delete(1.0, tk.END)  # Очищаем текстовый виджет
+        self.terminal_output.delete(1.0, tk.END)  
         self.terminal_output.config(state='disabled')
 
 

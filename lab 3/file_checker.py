@@ -10,7 +10,7 @@ logging.basicConfig(filename="invalid_files_and_folders.log", level=logging.INFO
 def check_files_and_folders_in_directory(directory):
     invalid_files_and_folders = []
     total_files_and_folders = 0  # Считаем общее количество файлов и папок
-    valid_pattern = re.compile(r'^[A-Z]+$')  # Только буквы A-Z
+    valid_pattern = re.compile(r'^[A-Z]+$')  
 
     # Обходим директорию и проверяем имена файлов и папок
     for root, dirs, files in os.walk(directory):
@@ -41,5 +41,4 @@ def check_files_and_folders_in_directory(directory):
         f"Подробности записаны в лог файл."
     )
 
-    # Выводим результат пользователю
     messagebox.showinfo("Результат проверки", result_message)
