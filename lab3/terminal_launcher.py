@@ -1,15 +1,29 @@
 import subprocess
 import os
+import platform
 from tkinter import messagebox
 
 
 def open_terminal():
     try:
-        subprocess.Popen(['gnome-terminal'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        system_name = platform.system()
+
+        if system_name == 'Linux':
+            if subprocess.call(['which', 'gnome-terminal'], stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0:
+                subprocess.Popen(['gnome-terminal'])
+            else:
+                messagebox.showerror("Ошибка", "gnome-terminal не найден. Попробуйте установить его или используйте другой терминал.")
+        elif system_name == 'Darwin':  # macOS
+            subprocess.Popen(['open', '-a', 'Terminal'])
+        elif system_name == 'Windows':
+            subprocess.Popen(['cmd.exe'])
+        else:
+            messagebox.showerror("Ошибка", "Неизвестная операционная система.")
+        
         messagebox.showinfo("Успех", "Терминал запущен.")
+    
     except Exception as e:
         messagebox.showerror("Ошибка", f"Ошибка при запуске терминала: {e}")
-
 
 def run_terminal_command(command):
     # Разбиваем команду на слова для удобной обработки
