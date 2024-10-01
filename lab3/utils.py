@@ -1,4 +1,8 @@
-import os
+from tkinter import filedialog
 
-def is_valid_directory(directory):
-    return os.path.exists(directory) and os.path.isdir(directory)
+
+def select_directory():
+    directory = filedialog.askdirectory()
+    if not directory:
+        return None
+    return directory
