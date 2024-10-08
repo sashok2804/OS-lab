@@ -3,14 +3,18 @@ import re
 import logging
 from tkinter import messagebox
 
-# Настройка логирования
-logging.basicConfig(filename="invalid_files_and_folders.log", level=logging.INFO, 
-                    format='%(asctime)s - %(message)s')
+# Создание отдельного логгера для этого модуля
+checker_logger = logging.getLogger("checker_logger")
+checker_logger.setLevel(logging.INFO)
+checker_handler = logging.FileHandler("invalid_files_and_folders.log")
+checker_formatter = logging.Formatter('%(asctime)s - %(message)s')
+checker_handler.setFormatter(checker_formatter)
+checker_logger.addHandler(checker_handler)
 
 def check_files_and_folders_in_directory(directory):
     invalid_files_and_folders = []
     total_files_and_folders = 0  # Считаем общее количество файлов и папок
-    valid_pattern = re.compile(r'^[A-Z]+$')  
+    valid_pattern = re.compile(r'^[A-Z]+')  # Паттерн для валидных имен
 
     # Обходим директорию и проверяем имена файлов и папок
     for root, dirs, files in os.walk(directory):
@@ -26,9 +30,9 @@ def check_files_and_folders_in_directory(directory):
 
     # Записываем в лог-файл пути недопустимых файлов и папок
     if invalid_files_and_folders:
-        logging.info("Найдены файлы и папки с недопустимыми символами:")
+        checker_logger.info("Найдены файлы и папки с недопустимыми символами:")
         for item in invalid_files_and_folders:
-            logging.info(item)
+            checker_logger.info(item)
 
     # Формируем результат для отображения в интерфейсе
     invalid_count = len(invalid_files_and_folders)
