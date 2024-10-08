@@ -43,7 +43,10 @@ def resolve_deadlock(window):
     x1.locked_by = None
     x3.locked_by = None
     messagebox.showinfo("Решение", "T1 была прервана для выхода из взаимоблокировки.")
-    draw_graph(t1, t2, x1, x3, window)
+    
+    # Перерисовка графа только для оставшихся активных элементов
+    draw_graph(None, t2, x1, x3, window)
+
 
 # Создание интерфейса
 window = tk.Tk()
