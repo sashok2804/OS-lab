@@ -1,4 +1,3 @@
-# graph_drawer.py
 import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -16,9 +15,9 @@ def draw_graph(t1, t2, x1, x3, window):
     G = nx.DiGraph()
 
     # Добавляем зависимости транзакций и ресурсов
-    if t1 and t1.waiting_for:  # Добавляем ребро, только если T1 существует и что-то ожидает
+    if t1 and t1.waiting_for:
         G.add_edge(t1.name, t1.waiting_for.name)
-    if t2 and t2.waiting_for:  # Добавляем ребро, если T2 ожидает что-то
+    if t2 and t2.waiting_for:
         G.add_edge(t2.name, t2.waiting_for.name)
     
     # Если ресурсы заблокированы транзакциями, добавляем рёбра от ресурсов к транзакциям
@@ -26,6 +25,20 @@ def draw_graph(t1, t2, x1, x3, window):
         G.add_edge(x1.name, x1.locked_by.name)
     if x3.locked_by:
         G.add_edge(x3.name, x3.locked_by.name)
+    
+    # Если ресурсы ожидаются транзакциями
+    if t1:
+        for res in t1.resources:
+            if res.locked_by == t1:
+                G.add_edge(t1.name, res.name)
+    if t2:
+        for res in t2.resources:
+            if res.locked_by == t2:
+                G.add_edge(t2.name, res.name)
+
+    if not G.nodes:
+        messagebox.showinfo("Граф пуст", "Нет активных зависимостей для отображения.")
+        return
 
     pos = nx.circular_layout(G)
 
@@ -36,4 +49,5 @@ def draw_graph(t1, t2, x1, x3, window):
     current_canvas = FigureCanvasTkAgg(fig, master=window)
     current_canvas.get_tk_widget().pack(side="top", fill="both", expand=True)
     current_canvas.draw()
+
 

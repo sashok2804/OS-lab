@@ -1,4 +1,3 @@
-# main.py
 import tkinter as tk
 from tkinter import messagebox
 from resource import Resource
@@ -47,8 +46,6 @@ def resolve_deadlock(window):
     
     # Перерисовка графа только с T2 и ресурсами, так как T1 прервана
     draw_graph(None, t2, x1, x3, window)  # Передаем None вместо T1
-
-
 
 # Создание интерфейса
 window = tk.Tk()
