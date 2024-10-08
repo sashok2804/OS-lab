@@ -36,16 +36,18 @@ def simulate_deadlock(window):
     if t1.waiting_for == t2 and t2.waiting_for == t1:
         messagebox.showwarning("Взаимоблокировка!", "Произошла взаимоблокировка! T1 и T2 ждут друг друга.")
 
-# Функция выхода из взаимоблокировки
 def resolve_deadlock(window):
     # Прерывание T1 для выхода из взаимоблокировки
-    t1.waiting_for = None
-    x1.locked_by = None
+    t1.waiting_for = None  # T1 больше ни за что не отвечает
+    t2.waiting_for = None  # T2 должна завершить свою работу без ожидания
+    x1.locked_by = None    # Все ресурсы освобождены
     x3.locked_by = None
+    
     messagebox.showinfo("Решение", "T1 была прервана для выхода из взаимоблокировки.")
     
-    # Перерисовка графа только для оставшихся активных элементов
-    draw_graph(None, t2, x1, x3, window)
+    # Перерисовка графа только с T2 и ресурсами, так как T1 прервана
+    draw_graph(None, t2, x1, x3, window)  # Передаем None вместо T1
+
 
 
 # Создание интерфейса
