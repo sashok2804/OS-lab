@@ -7,7 +7,7 @@ logging.basicConfig(filename="security_events.log", level=logging.INFO, format='
 
 # Базовые данные для аутентификации
 USER_CREDENTIALS = {"User": "user_password"}
-CERTIFICATE_PATH = "admin_cert.pem"  # Путь к цифровому сертификату Admin
+CERTIFICATE_NAME = "admin_cert.pem"  # Имя цифрового сертификата Admin
 
 # Аутентификация для User
 def authenticate_user(username, password):
@@ -17,9 +17,10 @@ def authenticate_user(username, password):
     logging.warning(f"Неудачная попытка входа для User '{username}'.")
     return False
 
-# Аутентификация для Admin с проверкой сертификата
+# Аутентификация для Admin с проверкой имени сертификата
 def authenticate_admin(cert_path):
-    if os.path.exists(cert_path):
+    cert_file_name = os.path.basename(cert_path)  # Извлекаем имя файла из полного пути
+    if cert_file_name == CERTIFICATE_NAME:
         logging.info("Admin аутентифицирован с использованием сертификата.")
         return True
     logging.warning("Неудачная попытка аутентификации Admin.")
