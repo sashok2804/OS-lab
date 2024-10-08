@@ -62,6 +62,8 @@ class Application(tk.Tk):
 
         btn_run_command = ttk.Button(tab, text="Выполнить", command=self.run_terminal_command)
         btn_run_command.pack(side=tk.LEFT, padx=5, pady=5)
+
+        self.command_entry.bind('<Return>', lambda event: self.run_terminal_command())
     
     def create_folder(self):
         directory = select_directory()

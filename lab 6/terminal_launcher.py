@@ -1,7 +1,10 @@
 import os
-import platform
+import psutil
 import shutil
-from datetime import datetime
+import socket
+import pwd
+import grp
+from getpass import getuser
 
 def run_terminal_command(command):
     command_parts = command.strip().split()
@@ -30,16 +33,13 @@ def run_terminal_command(command):
             "12. chmod <mode> <filename> — изменяет права доступа к файлу.\n"
             "13. chown <user>:<group> <filename> — изменяет владельца файла.\n"
             "Команды безопасности:\n"
-            "14. netstat — показывает сетевые подключения.\n"
-            "15. ps — показывает процессы.\n"
-            "16. ufw status — проверка статуса файрвола (Linux).\n"
-            "17. who — показывает список текущих пользователей системы.\n"
-            "18. last — показывает историю входов пользователей.\n"
-            "19. df — показывает использование диска.\n"
-            "20. du — показывает размер директорий.\n"
-            "21. top — показывает системные процессы в реальном времени.\n"
-            "22. kill <pid> — завершает процесс по ID.\n"
-            "23. ip a — показывает информацию об IP-адресах.\n"
+            "14. ps — показывает процессы.\n"
+            "15. who — показывает текущего пользователя.\n"
+            "16. df — показывает использование диска.\n"
+            "17. du — показывает размер директорий.\n"
+            "18. top — показывает системные процессы.\n"
+            "19. kill <pid> — завершает процесс по ID.\n"
+            "20. ip a — показывает информацию об IP-адресах.\n"
         )
     elif cmd == 'clear':
         return ""
@@ -129,58 +129,102 @@ def run_terminal_command(command):
         except OSError as e:
             return f"Ошибка при чтении файла: {e}"
 
-    # Команды безопасности
+    # Команды безопасности через Python API
     elif cmd == 'ps':
         try:
-            processes = os.popen('ps aux').read()
-            return processes
+            processes = []
+            for proc in psutil.process_iter(['pid', 'name', 'username']):
+                processes.append(f"{proc.info['pid']} {proc.info['username']} {proc.info['name']}")
+            return "\n".join(processes)
         except Exception as e:
             return f"Ошибка при получении списка процессов: {e}"
 
     elif cmd == 'who':
-        try:
-            users = os.popen('who').read()
-            return users
-        except Exception as e:
-            return f"Ошибка при получении списка пользователей: {e}"
+        return f"Текущий пользователь: {getuser()}"
 
     elif cmd == 'df':
         try:
-            usage = os.popen('df -h').read()
-            return usage
+            partitions = psutil.disk_partitions()
+            usage = []
+            for partition in partitions:
+                part_usage = psutil.disk_usage(partition.mountpoint)
+                usage.append(
+                    f"{partition.device} {part_usage.total // (2**30)}G {part_usage.used // (2**30)}G {part_usage.free // (2**30)}G"
+                )
+            return "\n".join(usage)
         except Exception as e:
             return f"Ошибка при получении информации о диске: {e}"
 
     elif cmd == 'du':
+        if len(command_parts) < 2:
+            path = '.'
+        else:
+            path = command_parts[1]
         try:
-            size = os.popen('du -sh').read()
-            return size
+            total_size = 0
+            for dirpath, dirnames, filenames in os.walk(path):
+                for f in filenames:
+                    fp = os.path.join(dirpath, f)
+                    total_size += os.path.getsize(fp)
+            return f"Размер директории {path}: {total_size // (1024 * 1024)} MB"
         except Exception as e:
-            return f"Ошибка при получении размера директорий: {e}"
+            return f"Ошибка при получении размера директории: {e}"
 
     elif cmd == 'top':
         try:
-            top_output = os.popen('top -bn1').read()
-            return top_output
+            processes = []
+            for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_percent']):
+                processes.append(f"{proc.info['pid']} {proc.info['name']} CPU: {proc.info['cpu_percent']}% MEM: {proc.info['memory_percent']}%")
+            return "\n".join(processes)
         except Exception as e:
-            return f"Ошибка при запуске top: {e}"
+            return f"Ошибка при получении списка процессов: {e}"
 
     elif cmd == 'kill':
         if len(command_parts) < 2:
             return "Пожалуйста, укажите PID процесса."
-        pid = command_parts[1]
+        pid = int(command_parts[1])
         try:
-            os.kill(int(pid), 9)
+            psutil.Process(pid).kill()
             return f"Процесс с PID {pid} завершен."
-        except OSError as e:
+        except Exception as e:
             return f"Ошибка при завершении процесса: {e}"
 
     elif cmd == 'ip' and command_parts[1] == 'a':
         try:
-            ip_info = os.popen('ip a').read()
-            return ip_info
+            hostname = socket.gethostname()
+            ip_address = socket.gethostbyname(hostname)
+            return f"Hostname: {hostname}\nIP Address: {ip_address}"
         except Exception as e:
             return f"Ошибка при получении информации об IP: {e}"
+        
+    elif cmd == 'chmod':
+        if len(command_parts) < 3:
+            return "Пожалуйста, укажите режим доступа и файл."
+        mode = int(command_parts[1], 8)
+        filename = command_parts[2]
+        try:
+            os.chmod(filename, mode)
+            return f"Права доступа для {filename} изменены на {oct(mode)}."
+        except OSError as e:
+            return f"Ошибка при изменении прав доступа: {e}"
+
+    elif cmd == 'chown':
+        if len(command_parts) < 3:
+            return "Пожалуйста, укажите пользователя, группу и файл."
+        user_group = command_parts[1].split(':')
+        user = user_group[0]
+        group = user_group[1] if len(user_group) > 1 else None
+        filename = command_parts[2]
+
+        try:
+            uid = pwd.getpwnam(user).pw_uid
+            gid = grp.getgrnam(group).gr_gid if group else -1
+            os.chown(filename, uid, gid)
+            return f"Владелец файла {filename} изменен на {user}:{group}."
+        except KeyError:
+            return "Пользователь или группа не найдены."
+        except OSError as e:
+            return f"Ошибка при изменении владельца файла: {e}"
 
     else:
         return f"Неизвестная команда: {command}"
