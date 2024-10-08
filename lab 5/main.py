@@ -5,7 +5,7 @@ from transaction import Transaction
 from graph_drawer import draw_graph
 
 # Функция для захвата ресурсов транзакциями
-def acquire_resource(transaction, resource, window):
+def acquire_resource(transaction, resource, t1, t2, x1, x3, window):
     if resource.locked_by is None:
         resource.locked_by = transaction
     else:
@@ -23,16 +23,16 @@ def simulate_deadlock(window):
     t2.waiting_for = None
 
     # T1 захватывает X1
-    acquire_resource(t1, x1, window)
+    acquire_resource(t1, x1, t1, t2, x1, x3, window)
     # T2 захватывает X3
-    acquire_resource(t2, x3, window)
+    acquire_resource(t2, x3, t1, t2, x1, x3, window)
     # T1 пытается захватить X3
-    acquire_resource(t1, x3, window)
+    acquire_resource(t1, x3, t1, t2, x1, x3, window)
     # T2 пытается захватить X1
-    acquire_resource(t2, x1, window)
+    acquire_resource(t2, x1, t1, t2, x1, x3, window)
 
     # Проверка на взаимоблокировку
-    if t1.waiting_for == t2 and t2.waiting_for == t1:
+    if t1.waiting_for == t2.locked_by and t2.waiting_for == t1.locked_by:
         messagebox.showwarning("Взаимоблокировка!", "Произошла взаимоблокировка! T1 и T2 ждут друг друга.")
 
 def resolve_deadlock(window):
