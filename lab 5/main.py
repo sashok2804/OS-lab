@@ -32,8 +32,10 @@ def simulate_deadlock(window):
     acquire_resource(t2, x1, t1, t2, x1, x3, window)
 
     # Проверка на взаимоблокировку
-    if t1.waiting_for == t2.locked_by and t2.waiting_for == t1.locked_by:
-        messagebox.showwarning("Взаимоблокировка!", "Произошла взаимоблокировка! T1 и T2 ждут друг друга.")
+    if t1.waiting_for and t2.waiting_for:
+        if t1.waiting_for == t2 and t2.waiting_for == t1:
+            messagebox.showwarning("Взаимоблокировка!", "Произошла взаимоблокировка! T1 и T2 ждут друг друга.")
+
 
 def resolve_deadlock(window):
     # Прерывание T1 для выхода из взаимоблокировки
