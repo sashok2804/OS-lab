@@ -19,7 +19,7 @@ def authenticate_user(username, password):
 
 # Аутентификация для Admin с проверкой сертификата
 def authenticate_admin(cert_path):
-    if os.path.exists(cert_path) and cert_path == CERTIFICATE_PATH:
+    if os.path.exists(cert_path):
         logging.info("Admin аутентифицирован с использованием сертификата.")
         return True
     logging.warning("Неудачная попытка аутентификации Admin.")
