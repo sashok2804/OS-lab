@@ -1,12 +1,17 @@
+# graph_drawer.py
 import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+# Глобальная переменная для хранения текущего графика
+current_canvas = None
+
 def draw_graph(t1, t2, x1, x3, window):
-    # Очищаем все виджеты перед отрисовкой нового графика
-    for widget in window.winfo_children():
-        if isinstance(widget, FigureCanvasTkAgg):
-            widget.get_tk_widget().destroy()
+    global current_canvas
+
+    # Если есть предыдущий график, уничтожаем его
+    if current_canvas:
+        current_canvas.get_tk_widget().destroy()
 
     G = nx.DiGraph()
 
@@ -27,6 +32,6 @@ def draw_graph(t1, t2, x1, x3, window):
     nx.draw(G, pos, with_labels=True, ax=ax, node_color='lightblue', node_size=3000, font_size=12, font_weight='bold')
 
     # Встраиваем график в окно tkinter
-    canvas = FigureCanvasTkAgg(fig, master=window)
-    canvas.get_tk_widget().pack(side="top", fill="both", expand=True)
-    canvas.draw()
+    current_canvas = FigureCanvasTkAgg(fig, master=window)
+    current_canvas.get_tk_widget().pack(side="top", fill="both", expand=True)
+    current_canvas.draw()
