@@ -15,7 +15,6 @@ def acquire_resource(transaction, resource, t1, t2, x1, x3, window):
 
 # Функция моделирования взаимоблокировки
 def simulate_deadlock(window):
-    # Сброс ресурсов
     for r in [x1, x3]:
         r.locked_by = None
 
@@ -46,8 +45,7 @@ def resolve_deadlock(window):
     
     messagebox.showinfo("Решение", "T1 была прервана для выхода из взаимоблокировки.")
     
-    # Перерисовка графа только с T2 и ресурсами, так как T1 прервана
-    draw_graph(None, t2, x1, x3, window)  # Передаем None вместо T1
+    draw_graph(None, t2, x1, x3, window)  
 
 # Создание интерфейса
 window = tk.Tk()
@@ -61,7 +59,6 @@ x3 = Resource("X3")
 t1 = Transaction("T1", [x1, x3])
 t2 = Transaction("T2", [x3, x1])
 
-# Кнопки
 simulate_button = tk.Button(window, text="Смоделировать взаимоблокировку", command=lambda: simulate_deadlock(window))
 simulate_button.pack(pady=10)
 
@@ -71,5 +68,4 @@ resolve_button.pack(pady=10)
 exit_button = tk.Button(window, text="Выход", command=window.quit)
 exit_button.pack(pady=10)
 
-# Запуск приложения
 window.mainloop()
