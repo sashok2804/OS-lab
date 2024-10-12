@@ -1,13 +1,14 @@
 @echo off
+git status
 :: Запрашиваем имя коммита
-set /p commitName="Введите имя коммита (обязательно): "
+set /p commitName="Commit name (!!!): "
 
 if "%commitName%"=="" (
-    echo Ошибка: Имя коммита обязательно!
+    echo Ошибка: Error! Pls input commit name
     exit /b 1
 )
 
-set /p commitComment="Введите комментарий (опционально): "
+set /p commitComment="Commit coment (ne obyaz): "
 
 git add .
 
